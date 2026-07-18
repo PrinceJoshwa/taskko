@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tasko — Pre-Sales CRM for Real Estate Teams</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* Matching Premium Black & Dark Green Palette */
+    --bg-deep: #030504;       
+    --bg-panel: #06120b;      
+    --bg-panel-2: #091a10;    
+    --green-dark: #0a4731;    
+    --green-primary: #127552; 
+    --green-accent: #20b881;  
+    --ink: #f0f4f2;           
+    --ink-muted: #9caaa3;
+    --ink-faint: #5a6b64;
+    --line: #142e21;          
+    --line-soft: #0d2116;
+    
+    /* Semantic Status colors mapped to dark green theme */
+    --status-avail: var(--green-accent);
+    --status-avail-bg: rgba(32, 184, 129, 0.15);
+    --status-held: var(--green-primary);
+    --status-held-bg: rgba(18, 117, 82, 0.15);
+    --status-booked: var(--green-dark);
+    --status-booked-bg: rgba(10, 71, 49, 0.25);
+    --status-sold: #5a6b64;
+    --status-sold-bg: rgba(90, 107, 100, 0.15);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg-deep);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  body::before{
+    content:""; position:fixed; inset:0;
+    background:
+      radial-gradient(ellipse 900px 600px at 15% -5%, rgba(32, 184, 129, 0.04), transparent 60%),
+      radial-gradient(ellipse 800px 600px at 90% 10%, rgba(10, 71, 49, 0.15), transparent 60%),
+      radial-gradient(ellipse 600px 400px at 50% 100%, rgba(18, 117, 82, 0.04), transparent 60%);
+    pointer-events:none; z-index:0;
+  }
+  h1,h2,h3,.display{font-family:'Space Grotesk',sans-serif;letter-spacing:-0.01em;font-weight:600;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  a{color:inherit;text-decoration:none;}
+  img{display:block;max-width:100%;}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 32px;}
+  section{position:relative; z-index: 1;}
+  ::selection{background:var(--green-accent);color:#030504;}
+  :focus-visible{outline:2px solid var(--green-accent);outline-offset:3px;}
+
+  .reveal{opacity:0;transform:translateY(18px);transition:opacity .7s ease, transform .7s ease;}
+  .reveal.in{opacity:1;transform:translateY(0);}
+
+  .btn{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:13px 24px;border-radius:9px;
+    font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;
+    cursor:pointer;border:1px solid transparent;
+    transition:transform .18s ease, box-shadow .18s ease, background .18s ease, border-color .18s ease, color .18s ease;
+    white-space:nowrap;
+  }
+  .btn-primary{
+    background:linear-gradient(135deg,var(--green-accent),var(--green-primary) 70%);
+    color:#030504;
+    box-shadow:0 1px 0 rgba(255,255,255,0.3) inset, 0 8px 20px -8px rgba(18, 117, 82, 0.5);
+  }
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 1px 0 rgba(255,255,255,0.35) inset, 0 12px 26px -8px rgba(18, 117, 82, 0.7);}
+  .btn-dark{background:var(--bg-panel);color:var(--ink); border: 1px solid var(--line);}
+  .btn-dark:hover{background:var(--bg-panel-2);transform:translateY(-2px); border-color: var(--green-primary);}
+  .btn-ghost{background:rgba(10, 71, 49, 0.1);color:var(--ink);border-color:var(--line);}
+  .btn-ghost:hover{border-color:var(--green-primary);color:var(--ink); background:rgba(10, 71, 49, 0.25);}
+  .btn-ghost-dark{background:transparent;color:var(--ink);border-color:var(--line);}
+  .btn-ghost-dark:hover{border-color:var(--green-accent);color:var(--green-accent);}
+  .btn-sm{padding:9px 16px;font-size:13.5px;}
+
+  /* ---------- Nav ---------- */
+  header{
+    position:sticky;top:0;z-index:50;
+    background:rgba(3, 5, 4, 0.75);
+    backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--line-soft);
+  }
+  nav{display:flex;align-items:center;justify-content:space-between;padding:14px 0;}
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand img{height:34px;width:auto;}
+  .brand-text .k{color:var(--green-primary);}
+  .brand .mark{
+    width:34px;height:34px;border-radius:8px;
+    background:linear-gradient(150deg,var(--green-accent),var(--green-primary));
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Space Grotesk',sans-serif;font-weight:700;color:#030504;font-size:17px;
+  }
+  .brand-text{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:19px;color:var(--ink);}
+  .nav-links{display:flex;gap:30px;align-items:center;}
+  .nav-links a{font-size:14.5px;color:var(--ink-muted);transition:color .15s ease;}
+  .nav-links a:hover{color:var(--ink);}
+  .nav-cta{display:flex;align-items:center;gap:14px;}
+  @media (max-width:860px){.nav-links{display:none;}}
+  @media (max-width:640px){
+    .nav-cta a.btn-ghost-dark{display:none;}
+    nav{gap:10px;}
+  }
+
+  /* ---------- Hero ---------- */
+  .hero{background:transparent; padding:78px 0 90px;}
+  .hero-grid{display:grid;grid-template-columns:1.05fr 0.95fr;gap:56px;align-items:center;}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:var(--green-accent);
+    background:rgba(32, 184, 129, 0.08);border:1px solid rgba(32, 184, 129, 0.25);
+    padding:6px 12px;border-radius:100px;margin-bottom:22px;letter-spacing:0.02em;
+  }
+  .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--green-accent);box-shadow:0 0 0 3px rgba(32, 184, 129, 0.15);}
+  .hero h1{font-size:clamp(32px,4.3vw,52px);line-height:1.1;color:var(--ink);margin-bottom:22px;}
+  .hero h1 em{
+    font-style:normal;
+    background:linear-gradient(135deg,var(--green-accent),var(--green-primary));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .hero p.lede{font-size:17.5px;color:var(--ink-muted);max-width:520px;margin-bottom:30px;}
+  .hero-ctas{display:flex;gap:14px;align-items:center;margin-bottom:26px;flex-wrap:wrap;}
+  .hero-trust{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--ink-faint);flex-wrap:wrap;}
+  .hero-trust .dot{width:4px;height:4px;border-radius:50%;background:var(--ink-faint);}
+
+  /* ---------- Role-based notification widget (signature) ---------- */
+  .role-panel{
+    background:var(--bg-panel);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:20px;
+    box-shadow:0 30px 60px -20px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(18, 117, 82, 0.1) inset;
+  }
+  .role-tabs{display:flex;gap:6px;background:rgba(0,0,0,0.4);border-radius:10px;padding:5px;margin-bottom:18px; border: 1px solid var(--line-soft);}
+  .role-tab{
+    flex:1;text-align:center;padding:9px 6px;border-radius:7px;
+    font-family:'Space Grotesk',sans-serif;font-size:12.5px;font-weight:600;
+    color:var(--ink-faint);cursor:pointer;transition:all .25s ease;
+    border:none;background:transparent;
+  }
+  .role-tab.active{background:var(--bg-panel-2);color:var(--green-accent); border: 1px solid var(--line);}
+  .role-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+  .role-head .who{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-muted);text-transform:uppercase;letter-spacing:0.05em;}
+  .role-head .cnt{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--green-accent);}
+  .notif{
+    display:flex;gap:12px;padding:13px 4px;border-bottom:1px solid var(--line-soft);
+    animation:fadeIn .4s ease;
+  }
+  .notif:last-child{border-bottom:none;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .notif .ic{
+    width:34px;height:34px;border-radius:9px;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;font-size:15px;
+  }
+  .notif .body h4{font-size:13.5px;color:var(--ink);font-weight:600;margin-bottom:3px;}
+  .notif .body p{font-size:12px;color:var(--ink-muted);}
+  .notif .time{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--ink-faint);margin-left:auto;white-space:nowrap;}
+
+  /* ---------- Section shared ---------- */
+  .section-head{max-width:660px;margin-bottom:52px;}
+  .kicker{
+    font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--green-primary);
+    text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px;display:block;
+  }
+  .section-head h2{font-size:clamp(26px,3.4vw,38px);line-height:1.15;color:var(--ink);}
+  .section-head p{color:var(--ink-muted);font-size:16px;margin-top:14px;}
+  .section-head.on-dark h2{color:var(--ink);}
+  .section-head.on-dark p{color:var(--ink-muted);}
+  .section-head.on-dark .kicker{color:var(--green-accent);}
+
+  /* ---------- Gap map (problem statements) ---------- */
+  .gap{padding:100px 0;}
+  .gap-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:18px;overflow:hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);}
+  .gap-col{padding:36px 34px;}
+  .gap-col.breaks{background:var(--bg-panel-2);border-right:1px solid var(--line);}
+  .gap-col.closes{background:var(--bg-panel);}
+  .gap-col .gh{display:flex;align-items:center;gap:10px;margin-bottom:22px;}
+  .gap-col .gh .tag{
+    font-family:'IBM Plex Mono',monospace;font-size:11px;padding:5px 11px;border-radius:100px;
+    text-transform:uppercase;letter-spacing:0.04em;
+  }
+  .gap-col.breaks .tag{background:rgba(10, 71, 49, 0.2);color:var(--green-primary); border: 1px solid var(--line);}
+  .gap-col.closes .tag{background:rgba(32, 184, 129, 0.15);color:var(--green-accent); border: 1px solid rgba(32, 184, 129, 0.3);}
+  .gap-col .gh h3{font-size:16px; color: var(--ink);}
+  .gap-item{display:flex;gap:12px;padding:13px 0;border-top:1px dashed var(--line);font-size:14.5px;color:var(--ink-muted);}
+  .gap-item:first-of-type{border-top:none;}
+  .gap-item .x{color:var(--green-dark);flex-shrink:0;font-weight:700;}
+  .gap-item .ck{color:var(--green-accent);flex-shrink:0;font-weight:700;}
+  @media (max-width:800px){
+    .gap-grid{grid-template-columns:1fr;}
+    .gap-col.breaks{border-right:none;border-bottom:1px solid var(--line);}
+  }
+
+  /* ---------- One-stop modules ---------- */
+  .modules{padding:100px 0;background:transparent;}
+  .mod-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;}
+  .mod-card{
+    background:var(--bg-panel);border:1px solid var(--line);border-radius:14px;
+    padding:22px 18px;transition:border-color .3s ease, transform .3s ease, box-shadow .3s ease;
+  }
+  .mod-card:hover{
+    border-color:var(--green-primary);transform:translateY(-3px);
+    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.6), 0 0 15px rgba(18, 117, 82, 0.1);
+  }
+  .mod-card .mi{font-size:19px;margin-bottom:14px; color: var(--green-accent);}
+  .mod-card h4{font-size:14px;color:var(--ink);margin-bottom:6px;}
+  .mod-card p{font-size:12px;color:var(--ink-muted);line-height:1.5;}
+  @media (max-width:900px){.mod-grid{grid-template-columns:repeat(3,1fr);}}
+  @media (max-width:560px){.mod-grid{grid-template-columns:repeat(2,1fr);}}
+
+  /* ---------- Product preview: pipeline + inventory ---------- */
+  .preview{padding:100px 0;}
+  .pv-tabs{display:flex;gap:10px;margin-bottom:28px;}
+  .pv-tab{
+    padding:9px 18px;border-radius:100px;font-family:'Space Grotesk',sans-serif;font-size:13.5px;font-weight:600;
+    border:1px solid var(--line);color:var(--ink-muted);cursor:pointer;background:transparent;
+    transition:all .2s ease;
+  }
+  .pv-tab:hover{ border-color: var(--green-primary); color: var(--ink); }
+  .pv-tab.active{background:var(--bg-panel-2);color:var(--green-accent);border-color:var(--green-primary);}
+
+  .board{display:none;}
+  .board.active{display:block; animation: fadeIn .4s ease;}
+  .kanban{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+  .kcol{background:var(--bg-panel);border:1px solid var(--line);border-radius:14px;padding:14px;}
+  .kcol-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding:0 4px;}
+  .kcol-head .lbl{display:flex;align-items:center;gap:7px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;text-transform:uppercase;letter-spacing:0.04em;color:var(--ink-muted);}
+  .kcol-head .dot{width:7px;height:7px;border-radius:50%;}
+  .kcol-head .n{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-faint);}
+  .kcard{background:var(--bg-panel-2);border:1px solid var(--line);border-radius:10px;padding:13px;margin-bottom:10px;}
+  .kcard .nm{font-size:13.5px;font-weight:600;margin-bottom:3px; color: var(--ink);}
+  .kcard .ph{font-size:11.5px;color:var(--ink-faint);margin-bottom:9px;font-family:'IBM Plex Mono',monospace;}
+  .kcard .meta{display:flex;justify-content:space-between;align-items:center;font-size:10.5px;color:var(--ink-faint);}
+  .kcard .src{font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:0.03em;}
+
+  .inv-legend{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
+  .inv-pill{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600; color: var(--ink);}
+  .inv-pill .d{width:8px;height:8px;border-radius:50%;}
+  .inv-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;}
+  .unit{border-radius:8px;padding:10px 8px;font-family:'IBM Plex Mono',monospace;}
+  .unit .u{font-size:12px;font-weight:600;}
+  .unit .t{font-size:10.5px;opacity:0.7;margin-top:2px;}
+  .avail{background:var(--status-avail-bg);color:var(--status-avail); border: 1px solid rgba(32, 184, 129, 0.3);}
+  .held{background:var(--status-held-bg);color:var(--status-held); border: 1px solid rgba(18, 117, 82, 0.3);}
+  .booked{background:var(--status-booked-bg);color:var(--status-booked); border: 1px solid var(--line);}
+  .sold{background:var(--status-sold-bg);color:var(--status-sold); border: 1px solid var(--line);}
+  @media (max-width:900px){.kanban{grid-template-columns:1fr 1fr;} .inv-grid{grid-template-columns:repeat(4,1fr);}}
+  @media (max-width:560px){.kanban{grid-template-columns:1fr;} .inv-grid{grid-template-columns:repeat(3,1fr);}}
+
+  /* ---------- Benchmark ---------- */
+  .benchmark{padding:100px 0;background:var(--bg-panel);border-top:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft);}
+  .bm-table{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--bg-panel-2); box-shadow: 0 20px 40px rgba(0,0,0,0.5);}
+  .bm-row{display:grid;grid-template-columns:1.3fr 1fr 1fr;}
+  .bm-row.head{background:var(--bg-deep);color:var(--ink);}
+  .bm-row.head .bm-cell{font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--ink-muted);}
+  .bm-row.head .bm-cell:nth-child(3){color:var(--green-accent);}
+  .bm-row:not(.head){border-top:1px solid var(--line);}
+  .bm-cell{padding:20px 22px;font-size:14px; color: var(--ink-muted);}
+  .bm-row:not(.head) .bm-cell:first-child{font-weight:600;color:var(--ink);}
+  .bm-row:not(.head) .bm-cell:nth-child(2){color:var(--ink-faint);}
+  .bm-row:not(.head) .bm-cell:nth-child(3){color:var(--green-accent);font-weight:600;}
+  .bm-note{margin-top:18px;font-size:12.5px;color:var(--ink-faint);}
+  @media (max-width:700px){
+    .bm-cell{padding:14px 14px;font-size:12.5px;}
+    .bm-row{grid-template-columns:1.2fr 1fr 1fr;}
+  }
+
+  /* ---------- CTA banner ---------- */
+  .cta-banner{padding:90px 0;}
+  .cta-box{
+    background:linear-gradient(135deg, var(--green-primary), var(--green-dark) 60%, #05261a);
+    border-radius:22px;padding:60px 56px;
+    display:flex;justify-content:space-between;align-items:center;gap:32px;
+    color:#ffffff;position:relative;overflow:hidden;
+    box-shadow: 0 20px 40px -10px rgba(10, 71, 49, 0.5);
+  }
+  .cta-box::after{content:"";position:absolute;right:-60px;top:-60px;width:240px;height:240px;background:radial-gradient(circle,rgba(255,255,255,0.1),transparent 70%);}
+  .cta-box h2{font-size:clamp(24px,3vw,34px);color:#ffffff;max-width:460px;position:relative;z-index:1;}
+  .cta-box p{color:rgba(255,255,255,0.8);margin-top:10px;font-size:15px;position:relative;z-index:1;}
+  .cta-box .actions{display:flex;gap:12px;flex-wrap:wrap;position:relative;z-index:1;}
+  .cta-box .btn-primary{background:#030504;color:var(--green-accent);box-shadow:none; border: 1px solid rgba(255,255,255,0.15);}
+  .cta-box .btn-primary:hover{background:#000;}
+  .cta-box .btn-ghost{border-color:rgba(255,255,255,0.2);color:#ffffff;}
+  .cta-box .btn-ghost:hover{border-color:#ffffff;background:rgba(255,255,255,0.06);}
+  @media (max-width:760px){.cta-box{flex-direction:column;align-items:flex-start;padding:44px 28px;}}
+
+  /* ---------- Footer ---------- */
+  footer{padding:56px 0 40px;background:var(--bg-deep);color:var(--ink-muted); border-top: 1px solid var(--line-soft);}
+  .foot-grid{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:32px;}
+  .foot-brand{display:flex;align-items:center;gap:10px;}
+  .foot-links{display:flex;gap:40px;flex-wrap:wrap;}
+  .foot-col h5{font-size:12px;text-transform:uppercase;letter-spacing:0.05em;color:var(--ink-faint);font-family:'IBM Plex Mono',monospace;margin-bottom:14px;font-weight:500;}
+  .foot-col a{display:block;font-size:14px;color:var(--ink-muted);margin-bottom:10px;}
+  .foot-col a:hover{color:var(--ink);}
+  .foot-bottom{margin-top:44px;padding-top:24px;border-top:1px solid var(--line-soft);display:flex;justify-content:space-between;color:var(--ink-faint);font-size:12.5px;flex-wrap:wrap;gap:10px;}
+
+  @media (max-width:900px){.hero-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+<nav>
+      <a href="#" class="brand">
+        <img src="https://ik.imagekit.io/j0xzq9pns/marketly/mark.png" alt="TaskKo mark">
+        <span class="brand-text">TASK<span class="k">KO</span></span>
+      </a>
+      <div class="nav-links">
+        <!-- Link to go back to the Post-Sales page -->
+        <a href="index.html">Post-Sales</a>
+        
+        <!-- Active Page (Where they are right now) -->
+        <a href="#" style="color: var(--green-accent); font-weight: 700; border-bottom: 2px solid var(--green-accent); padding-bottom: 4px;">Pre-Sales</a>
+        
+        <!-- Vertical divider line -->
+        <div style="width: 1px; height: 16px; background: var(--line); margin: 0 10px;"></div> 
+        
+        <a href="#gap">The gap</a>
+        <a href="#modules">Product</a>
+        <a href="#preview">Pipeline</a>
+        <a href="#benchmark">Benchmark</a>
+      </div>
+      <div class="nav-cta">
+        <a href="https://tasko-crm.preview.emergentagent.com/leads" target="_blank" class="btn btn-ghost-dark btn-sm">View live product</a>
+        <a href="#demo" class="btn btn-primary btn-sm">Book a demo</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="eyebrow">Pre-sales CRM for real estate teams</span>
+        <h1>The gap between a lead and a booking <em>closes here.</em></h1>
+        <p class="lede">Tasko runs leads, site visits and inventory in one pipeline — and tells every role exactly what needs attention today, before a stale lead or a missed follow-up costs you the deal.</p>
+        <div class="hero-ctas">
+          <a href="#demo" class="btn btn-primary">Book a demo today</a>
+          <a href="#gap" class="btn btn-ghost-dark">See the gap it closes</a>
+        </div>
+        <div class="hero-trust">
+          <span>Built for teams running multiple projects and sources at once</span>
+          <span class="dot"></span>
+          <span>One pipeline, every role</span>
+        </div>
+      </div>
+
+      <div class="role-panel reveal">
+        <div class="role-tabs">
+          <button class="role-tab active" data-role="founder">Founder</button>
+          <button class="role-tab" data-role="manager">Sales Manager</button>
+          <button class="role-tab" data-role="executive">Executive</button>
+        </div>
+        <div class="role-head">
+          <span class="who" id="roleWho">Portfolio view</span>
+          <span class="cnt" id="roleCnt">3 flagged</span>
+        </div>
+        <div id="notifList"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GAP MAP / PROBLEM STATEMENTS -->
+  <section class="gap" id="gap">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="kicker">The problem</span>
+        <h2>Sales teams don't lose deals in one place. They lose them in the handoffs.</h2>
+        <p>A lead comes in on one channel, gets followed up on a phone, scheduled on a calendar, and booked against inventory tracked in someone's head. Every handoff is where the gap opens.</p>
+      </div>
+
+      <div class="gap-grid reveal">
+        <div class="gap-col breaks">
+          <div class="gh"><span class="tag">Without Tasko</span><h3>What breaks in a manual process</h3></div>
+          <div class="gap-item"><span class="x">✕</span><span>Leads sit in spreadsheets until someone remembers to call them back.</span></div>
+          <div class="gap-item"><span class="x">✕</span><span>Site visit no-shows go unlogged, so nobody follows up on why.</span></div>
+          <div class="gap-item"><span class="x">✕</span><span>A founder finds out a lead has gone cold only after the deal is already dead.</span></div>
+          <div class="gap-item"><span class="x">✕</span><span>Managers can't tell which executives went quiet today until it's too late.</span></div>
+          <div class="gap-item"><span class="x">✕</span><span>The same unit gets promised to two clients because inventory lives in one person's head.</span></div>
+        </div>
+        <div class="gap-col closes">
+          <div class="gh"><span class="tag">With Tasko</span><h3>What closes the gap</h3></div>
+          <div class="gap-item"><span class="ck">✓</span><span>Every lead lands in one pipeline the moment it comes in, from any source.</span></div>
+          <div class="gap-item"><span class="ck">✓</span><span>Site visits are scheduled, marked done or no-show, and feed straight into follow-up.</span></div>
+          <div class="gap-item"><span class="ck">✓</span><span>Stale leads surface as a notification the day they go quiet, not weeks later.</span></div>
+          <div class="gap-item"><span class="ck">✓</span><span>Managers see executive activity and overdue follow-ups in real time, by role.</span></div>
+          <div class="gap-item"><span class="ck">✓</span><span>Inventory updates the instant a unit is held, booked or sold — one board, everyone.</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ONE STOP SOLUTION -->
+  <section class="modules" id="modules">
+    <div class="wrap">
+      <div class="section-head on-dark reveal">
+        <span class="kicker">Why Tasko — one stop solution</span>
+        <h2>One login, not eight tools stitched together.</h2>
+        <p>Leads, site visits, inventory, reporting and client outreach run in the same workspace — so nothing depends on someone remembering to update a second system.</p>
+      </div>
+      <div class="mod-grid">
+        <div class="mod-card reveal"><div class="mi">👥</div><h4>Leads</h4><p>Every source, one pipeline, filterable by stage, source and executive.</p></div>
+        <div class="mod-card reveal"><div class="mi">📅</div><h4>Site Visits</h4><p>Scheduled, marked done or no-show, tracked per project.</p></div>
+        <div class="mod-card reveal"><div class="mi">🔔</div><h4>Follow-ups</h4><p>Nothing overdue goes unseen — flagged by role, not buried in a list.</p></div>
+        <div class="mod-card reveal"><div class="mi">🏢</div><h4>Inventory</h4><p>Live availability by tower, floor and unit — held, booked, sold.</p></div>
+        <div class="mod-card reveal"><div class="mi">📊</div><h4>Reports</h4><p>Pipeline and team performance, without a monthly spreadsheet rebuild.</p></div>
+        <div class="mod-card reveal"><div class="mi">⇪</div><h4>Data Import</h4><p>Bring existing leads and inventory in without starting from zero.</p></div>
+        <div class="mod-card reveal"><div class="mi">💬</div><h4>WhatsApp Templates</h4><p>Consistent client outreach, sent from inside the same workspace.</p></div>
+        <div class="mod-card reveal"><div class="mi">🔀</div><h4>Bulk Lead Allocation</h4><p>Distribute incoming leads across executives by rule, not by hand.</p></div>
+        <div class="mod-card reveal"><div class="mi">🤝</div><h4>Channel Partners</h4><p>Broker-sourced leads tracked the same way as every other source.</p></div>
+        <div class="mod-card reveal"><div class="mi">🏗️</div><h4>Project Details</h4><p>Every project's configuration and pricing in one reference.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRODUCT PREVIEW -->
+  <section class="preview" id="preview">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="kicker">Inside the workspace</span>
+        <h2>The pipeline and the inventory board, side by side.</h2>
+        <p>What your team sees is what your founder sees — no separate spreadsheet to reconcile at the end of the week.</p>
+      </div>
+
+      <div class="pv-tabs reveal">
+        <button class="pv-tab active" data-board="pipeline">Leads pipeline</button>
+        <button class="pv-tab" data-board="inventory">Inventory board</button>
+      </div>
+
+      <div class="board active reveal" id="board-pipeline">
+        <div class="kanban">
+          <div class="kcol">
+            <div class="kcol-head"><span class="lbl"><span class="dot" style="background:#5a6b64"></span>New</span><span class="n">19</span></div>
+            <div class="kcard"><div class="nm">Ramya</div><div class="ph">919619995516</div><div class="meta"><span class="src">Manual</span><span>2d ago</span></div></div>
+            <div class="kcard"><div class="nm">Ramya</div><div class="ph">Prasanna</div><div class="meta"><span class="src">Manual</span><span>2d ago</span></div></div>
+          </div>
+          <div class="kcol">
+            <div class="kcol-head"><span class="lbl"><span class="dot" style="background:var(--green-dark)"></span>Contacted</span><span class="n">6</span></div>
+            <div class="kcard"><div class="nm">Testing</div><div class="ph">+919606334692</div><div class="meta"><span class="src">Manual</span><span>2d ago</span></div></div>
+            <div class="kcard"><div class="nm">Ramya</div><div class="ph">+91 91086 27464</div><div class="meta"><span class="src">Manual</span><span>2d ago</span></div></div>
+          </div>
+          <div class="kcol">
+            <div class="kcol-head"><span class="lbl"><span class="dot" style="background:var(--green-accent)"></span>Qualified</span><span class="n">11</span></div>
+            <div class="kcard"><div class="nm">Aarav Sinha</div><div class="ph">+91 9655590371</div><div class="meta"><span class="src">Walk-in</span><span>2d ago</span></div></div>
+            <div class="kcard"><div class="nm">Aryan Gupta</div><div class="ph">+91 9665412094</div><div class="meta"><span class="src">CommonFloor</span><span>3d ago</span></div></div>
+          </div>
+          <div class="kcol">
+            <div class="kcol-head"><span class="lbl"><span class="dot" style="background:var(--green-primary)"></span>Site Visit</span><span class="n">8</span></div>
+            <div class="kcard"><div class="nm">Sanvi</div><div class="ph">Housing</div><div class="meta"><span class="src">Housing</span><span>1d ago</span></div></div>
+            <div class="kcard"><div class="nm">Riya</div><div class="ph">Website</div><div class="meta"><span class="src">Website</span><span>1d ago</span></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="board" id="board-inventory">
+        <div class="inv-legend">
+          <span class="inv-pill avail"><span class="d" style="background:var(--status-avail)"></span>Available · 36</span>
+          <span class="inv-pill held"><span class="d" style="background:var(--status-held)"></span>Held · 14</span>
+          <span class="inv-pill booked"><span class="d" style="background:var(--status-booked)"></span>Booked · 9</span>
+          <span class="inv-pill sold"><span class="d" style="background:var(--status-sold)"></span>Sold · 5</span>
+        </div>
+        <div class="inv-grid">
+          <div class="unit held"><div class="u">A-0801</div><div class="t">4BHK</div></div>
+          <div class="unit avail"><div class="u">A-0802</div><div class="t">3BHK</div></div>
+          <div class="unit avail"><div class="u">A-0803</div><div class="t">4BHK</div></div>
+          <div class="unit avail"><div class="u">A-0804</div><div class="t">3BHK</div></div>
+          <div class="unit avail"><div class="u">A-0701</div><div class="t">4BHK</div></div>
+          <div class="unit avail"><div class="u">A-0702</div><div class="t">3BHK</div></div>
+          <div class="unit held"><div class="u">A-0703</div><div class="t">4BHK</div></div>
+          <div class="unit sold"><div class="u">A-0704</div><div class="t">3BHK</div></div>
+          <div class="unit avail"><div class="u">A-0601</div><div class="t">4BHK</div></div>
+          <div class="unit avail"><div class="u">A-0602</div><div class="t">3BHK</div></div>
+          <div class="unit booked"><div class="u">A-0603</div><div class="t">4BHK</div></div>
+          <div class="unit held"><div class="u">A-0604</div><div class="t">3BHK</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BENCHMARK -->
+  <section class="benchmark" id="benchmark">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="kicker">The Tasko benchmark</span>
+        <h2>The standard we hold every pipeline to.</h2>
+        <p>This is what changes when leads, site visits and inventory run in one system instead of five.</p>
+      </div>
+
+      <div class="bm-table reveal">
+        <div class="bm-row head">
+          <div class="bm-cell">Measure</div>
+          <div class="bm-cell">Manual process</div>
+          <div class="bm-cell">Tasko</div>
+        </div>
+        <div class="bm-row">
+          <div class="bm-cell">Time to first response on a new lead</div>
+          <div class="bm-cell">Hours — if remembered</div>
+          <div class="bm-cell">Logged and assigned instantly</div>
+        </div>
+        <div class="bm-row">
+          <div class="bm-cell">Overdue follow-up visibility</div>
+          <div class="bm-cell">Tracked in one person's head</div>
+          <div class="bm-cell">Flagged by role, in real time</div>
+        </div>
+        <div class="bm-row">
+          <div class="bm-cell">Site visit no-shows</div>
+          <div class="bm-cell">Rarely logged</div>
+          <div class="bm-cell">Marked and routed into follow-up</div>
+        </div>
+        <div class="bm-row">
+          <div class="bm-cell">Inventory accuracy</div>
+          <div class="bm-cell">Updated end of day, if at all</div>
+          <div class="bm-cell">Live, by tower, floor and unit</div>
+        </div>
+        <div class="bm-row">
+          <div class="bm-cell">Stale-lead detection</div>
+          <div class="bm-cell">Discovered when the deal is already cold</div>
+          <div class="bm-cell">Surfaced the day activity stops</div>
+        </div>
+      </div>
+      <p class="bm-note">Illustrative comparison based on typical manual pre-sales workflows — swap in your team's own before/after numbers once you're tracking them in Tasko.</p>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-banner" id="demo">
+    <div class="wrap">
+      <div class="cta-box reveal">
+        <div>
+          <h2>See Tasko running on your own leads.</h2>
+          <p>A 30-minute walkthrough — bring one live project and we'll show you exactly where the gap closes.</p>
+        </div>
+        <div class="actions">
+          <a href="#" class="btn btn-primary">Book a demo today</a>
+          <a href="https://tasko-crm.preview.emergentagent.com/leads" target="_blank" class="btn btn-ghost">View live product</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <span class="mark">T</span>
+        <span class="brand-text" style="color:var(--ink)">Tasko</span>
+      </div>
+      <div class="foot-links">
+        <div class="foot-col">
+          <h5>Product</h5>
+          <a href="#gap">The gap</a>
+          <a href="#modules">Modules</a>
+          <a href="#preview">Pipeline</a>
+          <a href="#benchmark">Benchmark</a>
+        </div>
+        <div class="foot-col">
+          <h5>Company</h5>
+          <a href="#">About</a>
+          <a href="#">Contact</a>
+        </div>
+        <div class="foot-col">
+          <h5>Get started</h5>
+          <a href="#demo">Book a demo</a>
+          <a href="https://tasko-crm.preview.emergentagent.com/leads" target="_blank">Live product</a>
+        </div>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 Tasko. Pre-sales CRM for real estate teams.</span>
+      <span>Built for teams running leads, site visits and inventory at scale.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Scroll reveal
+  const revealEls = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  },{threshold:0.12});
+  revealEls.forEach(el=>io.observe(el));
+
+  // Role-based notification data with updated green/black theme colors
+  const roleData = {
+    founder: {
+      who: 'Portfolio view', cnt: '3 flagged',
+      items: [
+        {ic:'📈', bg:'rgba(32, 184, 129, 0.15)', h:'Deals in negotiation', p:'7 leads awaiting decision', t:'5h ago'},
+        {ic:'⚠️', bg:'rgba(10, 71, 49, 0.25)', h:'Stale leads', p:'35 leads with no activity for 3+ days', t:'5h ago'},
+        {ic:'👥', bg:'rgba(18, 117, 82, 0.15)', h:'Executives with no activity today', p:'Priya Sharma, Karan Malhotra, Neha Iyer', t:'5h ago'},
+      ]
+    },
+    manager: {
+      who: 'Team view', cnt: '2 flagged',
+      items: [
+        {ic:'🔔', bg:'rgba(10, 71, 49, 0.25)', h:'Team follow-ups overdue', p:'12 follow-ups past due across the team', t:'5h ago'},
+        {ic:'📅', bg:'rgba(32, 184, 129, 0.15)', h:'Site visits today', p:'3 scheduled — Cedar Grove', t:'2h ago'},
+        {ic:'👤', bg:'rgba(18, 117, 82, 0.15)', h:'Unassigned new leads', p:'4 leads waiting for allocation', t:'1h ago'},
+      ]
+    },
+    executive: {
+      who: 'My tasks', cnt: '2 flagged',
+      items: [
+        {ic:'⏰', bg:'rgba(10, 71, 49, 0.25)', h:'Follow-up overdue', p:'Call · Testing — due yesterday', t:'1d ago'},
+        {ic:'📍', bg:'rgba(32, 184, 129, 0.15)', h:'Site visit in 1 hour', p:'Ishaan Rao — Cedar Grove', t:'now'},
+        {ic:'✅', bg:'rgba(18, 117, 82, 0.15)', h:'New lead assigned to you', p:'Aryan Gupta — CommonFloor', t:'20m ago'},
+      ]
+    }
+  };
+
+  const tabs = document.querySelectorAll('.role-tab');
+  const notifList = document.getElementById('notifList');
+  const roleWho = document.getElementById('roleWho');
+  const roleCnt = document.getElementById('roleCnt');
+
+  function renderRole(role){
+    const d = roleData[role];
+    roleWho.textContent = d.who;
+    roleCnt.textContent = d.cnt;
+    notifList.innerHTML = d.items.map(n => `
+      <div class="notif">
+        <div class="ic" style="background:${n.bg}">${n.ic}</div>
+        <div class="body"><h4>${n.h}</h4><p>${n.p}</p></div>
+        <div class="time">${n.t}</div>
+      </div>
+    `).join('');
+  }
+  tabs.forEach(tab=>{
+    tab.addEventListener('click', ()=>{
+      tabs.forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      renderRole(tab.dataset.role);
+    });
+  });
+  renderRole('founder');
+
+  // Auto-cycle roles every 3.5s unless user has interacted
+  let autoCycle = true;
+  let roleIdx = 0;
+  const roleOrder = ['founder','manager','executive'];
+  tabs.forEach(tab=>tab.addEventListener('click', ()=>{ autoCycle = false; }));
+  setInterval(()=>{
+    if(!autoCycle) return;
+    roleIdx = (roleIdx + 1) % roleOrder.length;
+    tabs.forEach(t=>t.classList.toggle('active', t.dataset.role===roleOrder[roleIdx]));
+    renderRole(roleOrder[roleIdx]);
+  }, 3500);
+
+  // Product preview tabs
+  const pvTabs = document.querySelectorAll('.pv-tab');
+  pvTabs.forEach(tab=>{
+    tab.addEventListener('click', ()=>{
+      pvTabs.forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      document.querySelectorAll('.board').forEach(b=>b.classList.remove('active'));
+      document.getElementById('board-'+tab.dataset.board).classList.add('active');
+    });
+  });
+
+  // Header shadow on scroll
+  const header = document.querySelector('header');
+  window.addEventListener('scroll', ()=>{
+    header.style.borderBottomColor = window.scrollY > 10 ? 'var(--line)' : 'var(--line-soft)';
+  });
+</script>
+
+</body>
+</html>
